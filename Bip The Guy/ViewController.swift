@@ -16,9 +16,11 @@ class ViewController: UIViewController {
     
     //MARK: - Properties
     private var audioPlayer = AVAudioPlayer()
+    private var imagePicker = UIImagePickerController()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        imagePicker.delegate = self
     }
     
     //MARK: - Functions
@@ -59,11 +61,26 @@ class ViewController: UIViewController {
         }
     }
     
+    private func showAlert(title: String, message: String) {
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let defaultAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+        alertController.addAction(defaultAction)
+        
+    }
+    
     //MARK: - Actions
     @IBAction private func photoLibraryTapped(_ sender: UIButton) {
+        imagePicker.sourceType = .photoLibrary
+        present(imagePicker, animated: true, completion: nil)
     }
     
     @IBAction private func takePhotoTapped(_ sender: UIButton) {
+        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+            imagePicker.sourceType = .camera
+            present(imagePicker, animated: true, completion: nil)
+        } else {
+            showAlert(title: "Camera Not Available", message: "There is no camera available on this device")
+        }
     }
     
     @IBAction private func imageTapped(_ sender: UITapGestureRecognizer) {
@@ -72,3 +89,17 @@ class ViewController: UIViewController {
     }
 }
 
+//MARK: - UIImagePickerControllerDelegate, UINavigationControllerDelegate
+extension ViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        dismiss(animated: true, completion: nil)
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        let selectedImage = info[UIImagePickerControllerOriginalImage] as! UIImage
+        
+        imageToPunch.image = selectedImage
+        
+        dismiss(animated: true, completion: nil)
+    }
+}
